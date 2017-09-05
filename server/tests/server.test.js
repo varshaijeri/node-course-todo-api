@@ -102,3 +102,40 @@ describe('GET /todos/:id',()=>{
         .end(done);
     });
 });
+
+describe('DELETE /todos/:id',()=>{
+    //test case for Id being Invalid
+    it('Should return with 404 if not found',(done)=>{
+        var hexId = new ObjectID().toHexString();
+        request(app)
+            .delete(`/todos/${hexId}`)
+            .expect(404)
+            .end(done);
+    })
+    //test case for Id which not present in collection
+    it('Should return 404 for object id invalid',(done)=>{
+        request(app)
+            .delete(`/todos/1234`)
+            .expect(404)
+            .end(done);
+    })
+    //test case for Id being present in collection
+    it('Should remove a todo',(done)=>{
+        var hexId = todosToAdd[1]._id.toHexString();
+        request(app)
+            .delete(`/todos/${hexId}`)
+            .expect(200)
+            .expect((res)=>{
+                expect(res.body.todo._id).toBe(hexId);
+            })
+            .end((err,res)=>{
+                if(err){
+                    return done(err);
+                }
+                Todo.findById(hexId).then((todo)=>{
+                    expect(todo).toNotExist();
+                    done();
+                }).catch((e)=>done(e));
+            });
+    });
+});
