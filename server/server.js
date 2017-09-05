@@ -82,11 +82,11 @@ app.patch('/todos/:id',(req,res)=>{
         body.completedAt = null;
     }
     //save to database
-    Todo.findByIdAndUpdate(id,{$set:body},{new:true}).then((updatedTodo)=>{
-        if(!updatedTodo){
+    Todo.findByIdAndUpdate(id,{$set:body},{new:true}).then((todo)=>{
+        if(!todo){
             return res.status(404).send();
         }
-        res.send({updatedTodo});
+        res.send({todo});
     }).catch((e)=>{
         res.status(400).send();
     });
