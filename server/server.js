@@ -1,6 +1,7 @@
 const express = require('express');
-//converts jsonto js object
+//converts json to js object
 const bodyParser = require('body-parser');
+const {ObjectId} = require('mongodb');
 
 const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./models/todo');
@@ -10,6 +11,7 @@ var app = express();
 
 app.use(bodyParser.json());
 
+//inserting todos
 app.post('/todos',(req,res)=>{
     var todo = new Todo({text:req.body.text});
     todo.save().then((doc)=>{
@@ -19,12 +21,30 @@ app.post('/todos',(req,res)=>{
     });
 });
 
-//get todos all
+//get all todos
 app.get('/todos',(req,res)=>{
     Todo.find().then((todos)=>{
         res.send({todos});
     },(err)=>{
         res.status(400).send(err);
+    });
+});
+
+//get individual todo
+app.get('/todos/:id',(req,res)=>{
+    var id = req.params.id;
+    //validate id
+    if(!ObjectId.isValid(id)){
+        //res-404-send back empty result
+        return res.status(404).send();
+    }
+    Todo.findById(id).then((todo)=>{
+        if(!todo){
+            return res.status(404).send();
+        }
+        res.send({todo});
+    }).catch((e)=>{
+        res.status(400).send();
     });
 });
 
