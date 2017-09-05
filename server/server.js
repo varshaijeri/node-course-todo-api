@@ -1,4 +1,5 @@
 const express = require('express');
+const _ = require('lodash');
 //converts json to js object
 const bodyParser = require('body-parser');
 const {ObjectId} = require('mongodb');
@@ -60,6 +61,32 @@ app.delete('/todos/:id',(req,res)=>{
             return res.status(404).send();
         }
         res.send({todo});
+    }).catch((e)=>{
+        res.status(400).send();
+    });
+});
+
+//to update todo item for completing the todo
+app.patch('/todos/:id',(req,res)=>{
+    var id = req.params.id;
+    var body = _.pick(req.body,['text','completed']);
+    if(!ObjectId.isValid(id)){
+        return res.status(404).send();
+    }
+    if(_.isBoolean(body.completed) && body.completed){
+        //set completedAt to timestamp value
+        body.completedAt = new Date().getTime();
+    }else{
+        //set completedAt to null
+        body.completed = false;
+        body.completedAt = null;
+    }
+    //save to database
+    Todo.findByIdAndUpdate(id,{$set:body},{new:true}).then((updatedTodo)=>{
+        if(!updatedTodo){
+            return res.status(404).send();
+        }
+        res.send({updatedTodo});
     }).catch((e)=>{
         res.status(400).send();
     });
