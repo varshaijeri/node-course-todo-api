@@ -1,11 +1,15 @@
 const expect = require('expect');
 const request = require('supertest');
+const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Todo} =require('./../models/todo');
 
 
-var todosToAdd = [{text:"Get chickens"},{text:"Get car"}];
+var todosToAdd = [
+    { text: "Get chickens", _id: new ObjectID() },
+    { text: "Get car", _id: new ObjectID() }
+];
 //executes before your test case executes
 beforeEach((done)=>{
     Todo.remove({}).then(()=>{
@@ -66,5 +70,35 @@ describe('GET /todos',()=>{
                 expect(res.body.todos.length).toBe(2);
             })
             .end(done);
+    });
+});
+
+describe('GET /todos/:id',()=>{
+    //test case for Id being Invalid
+    it('Should return 404 for non-object ids',(done)=>{
+        var id = "123";
+        request(app)
+            .get(`/todos/${id}`)
+            .expect(404)
+            .end(done);
+    });
+    //test case for Id which not present in collection
+    it('Should return 404 if todo not found',(done)=>{
+        var newObjId = new ObjectID();
+        request(app)
+        .get(`/todos/${newObjId.toHexString()}`)
+        .expect(404)
+        .end(done);
+    });
+    //test case for Id being present in collection
+    it('Should return todo doc',(done)=>{
+        request(app)
+        .get(`/todos/${todosToAdd[0]._id.toHexString()}`)
+        .expect(200)
+        //response from the UI 
+        .expect((res)=>{
+            expect(res.body.todo.text).toBe(todosToAdd[0].text);
+        })
+        .end(done);
     });
 });
