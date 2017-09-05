@@ -12,3 +12,8 @@ var User = mongoose.model('User',{
 module.exports = {
     User
 };
+
+
+//to create a collection create an instance of this model 
+//and pass the required fields of document in constructor 
+//function
