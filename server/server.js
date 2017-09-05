@@ -1,3 +1,5 @@
+require('./config/config');
+
 const express = require('express');
 const _ = require('lodash');
 //converts json to js object
@@ -8,7 +10,7 @@ const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./models/todo');
 const {User} = require('./models/user');
 
-var port = process.env.PORT || 3000;
+var port = process.env.PORT;
 var app = express();
 
 app.use(bodyParser.json());
