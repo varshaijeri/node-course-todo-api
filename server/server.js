@@ -94,6 +94,22 @@ app.patch('/todos/:id',(req,res)=>{
     });
 });
 
+//route for user registeration POST /users
+app.post('/users',(req,res)=>{
+    var userData = _.pick(req.body,['email','password']);
+    //create a new instance of User model 
+    var user = new User(userData);
+    //save to DB
+    user.save().then((doc)=>{
+        return user.getAuthToken();
+    }).then((token)=>{
+        //user.toJSON();
+        res.header('x-auth',token).send(user);
+    }).catch((err)=>{
+        res.status(400).send(err);
+    });
+});
+
 app.listen(port,()=>{
     console.log(`Started Server on ${port}`);
 });
