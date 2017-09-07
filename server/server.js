@@ -17,8 +17,8 @@ var app = express();
 app.use(bodyParser.json());
 
 //inserting todos
-app.post('/todos',(req,res)=>{
-    var todo = new Todo({text:req.body.text});
+app.post('/todos',authenticate,(req,res)=>{
+    var todo = new Todo({text:req.body.text,_creator:req.user._id});
     todo.save().then((doc)=>{
         res.send(doc);
     },(err)=>{
@@ -27,8 +27,8 @@ app.post('/todos',(req,res)=>{
 });
 
 //get all todos
-app.get('/todos',(req,res)=>{
-    Todo.find().then((todos)=>{
+app.get('/todos',authenticate,(req,res)=>{
+    Todo.find({_creator:req.user._id}).then((todos)=>{
         res.send({todos});
     },(err)=>{
         res.status(400).send(err);
@@ -36,14 +36,14 @@ app.get('/todos',(req,res)=>{
 });
 
 //get individual todo
-app.get('/todos/:id',(req,res)=>{
+app.get('/todos/:id',authenticate,(req,res)=>{
     var id = req.params.id;
     //validate id
     if(!ObjectId.isValid(id)){
         //res-404-send back empty result
         return res.status(404).send();
     }
-    Todo.findById(id).then((todo)=>{
+    Todo.findOne({_id:id,_creator:req.user._id}).then((todo)=>{
         if(!todo){
             return res.status(404).send();
         }
@@ -54,12 +54,12 @@ app.get('/todos/:id',(req,res)=>{
 });
 
 //delete invidual todo item
-app.delete('/todos/:id',(req,res)=>{
+app.delete('/todos/:id',authenticate,(req,res)=>{
     var id = req.params.id;
     if(!ObjectId.isValid(id)){
         return res.status(404).send();
     }
-    Todo.findByIdAndRemove(id).then((todo)=>{
+    Todo.findOneAndRemove({_id:id,_creator:req.user._id}).then((todo)=>{
         if(!todo){
             return res.status(404).send();
         }
@@ -70,7 +70,7 @@ app.delete('/todos/:id',(req,res)=>{
 });
 
 //to update todo item for completing the todo
-app.patch('/todos/:id',(req,res)=>{
+app.patch('/todos/:id',authenticate,(req,res)=>{
     var id = req.params.id;
     var body = _.pick(req.body,['text','completed']);
     if(!ObjectId.isValid(id)){
@@ -85,7 +85,7 @@ app.patch('/todos/:id',(req,res)=>{
         body.completedAt = null;
     }
     //save to database
-    Todo.findByIdAndUpdate(id,{$set:body},{new:true}).then((todo)=>{
+    Todo.findOneAndUpdate({_id:id,_creator:req.user._id},{$set:body},{new:true}).then((todo)=>{
         if(!todo){
             return res.status(404).send();
         }

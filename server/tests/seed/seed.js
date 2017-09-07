@@ -17,10 +17,14 @@ const userToAdd = [{
     _id:userTwoId,
     email:"varshaijeri11@gmail.com",
     password:"userTwoPass",
+    tokens:[{
+        access: 'auth',
+        token:jwt.sign({_id:userTwoId,access:'auth'},'salt').toString()
+    }]
 }]
 const todosToAdd = [
-    { text: "Get chickens", _id: new ObjectID() },
-    { text: "Get car", _id: new ObjectID() ,completed:true,completedAt:1234556}
+    { text: "Get chickens", _id: new ObjectID(),_creator:userOneId },
+    { text: "Get car", _id: new ObjectID() ,completed:true,completedAt:1234556,_creator:userTwoId}
 ];
 //executes before your test case executes
 const populateTodos = (done)=>{
