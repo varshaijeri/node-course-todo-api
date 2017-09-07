@@ -117,7 +117,7 @@ app.get('/users/me',authenticate,(req,res)=>{
 });
 
 //login route
-app.post('/login',(req,res)=>{
+app.post('/users/login',(req,res)=>{
     var userData = _.pick(req.body,['email','password']);
     User.findByCredentials(userData.email,userData.password).then((user)=>{
         return user.getAuthToken().then((token)=>{
