@@ -46,7 +46,7 @@ UserSchema.statics.findByToken = function(token){
     var User = this;
     var decoded;
     try{
-        decoded = jwt.verify(token,"salt");
+        decoded = jwt.verify(token,process.env.JWT_SECRET);
     }catch(e){
         return Promise.reject();
     }
@@ -60,7 +60,7 @@ UserSchema.statics.findByToken = function(token){
 UserSchema.methods.getAuthToken = function(){
     var user = this;
     var access = 'auth';
-    var token = jwt.sign({_id:user._id.toHexString(),access},"salt").toString();
+    var token = jwt.sign({_id:user._id.toHexString(),access},process.env.JWT_SECRET).toString();
     user.tokens.push({access,token});
     return user.save().then(()=>{
         return token;
